@@ -14,7 +14,7 @@ func main() {
 	ctx := context.Background()
 
 	dbConn, err := repository.NewMongoClient(ctx, repository.MongoConfig{
-		ConnectionString: "mongodb://localhost:27017",
+		ConnectionString: "mongodb://root:rootpassword@mongodb:27017",
 		DatabaseName:     "security_hw",
 	})
 	if err != nil {

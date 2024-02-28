@@ -1,11 +1,14 @@
 package handler
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"proxy/models"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -93,5 +96,38 @@ func (h *Handler) repeatRequest(request models.Request) ([]byte, error) {
 }
 
 func (h *Handler) scanRequestById(w http.ResponseWriter, r *http.Request) {
+	file, err := os.Open("params.txt")
+	if err != nil {
+		os.Exit(1)
+		return
+	}
+	defer file.Close()
+
+	data := make([]byte, 64)
+
+	for {
+		n, err := file.Read(data)
+		if err == io.EOF {
+			break
+		}
+
+		query := r.URL.Query()
+		query.Add("param", string(data[:n]))
+		r.URL.RawQuery = query.Encode()
+
+		resp, err := http.DefaultTransport.RoundTrip(r)
+		if err != nil {
+			return
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
+		if strings.Contains(string(body), string(data[:n])) {
+			fmt.Print(string(data[:n]))
+		}
+	}
 
 }
