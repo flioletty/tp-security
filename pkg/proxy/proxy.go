@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"proxy/models"
 	"proxy/pkg/service"
 	"time"
 )
@@ -33,7 +34,6 @@ func (p *Proxy) handleRequest(w http.ResponseWriter, r *http.Request) {
 	r.Header.Del("Proxy-Connection")
 	r.RequestURI = ""
 
-	// Send the proxy request using the custom transport
 	resp, err := customTransport.RoundTrip(r)
 	if err != nil {
 		http.Error(w, "Error sending proxy request", http.StatusInternalServerError)
@@ -41,14 +41,12 @@ func (p *Proxy) handleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
-	// Copy the headers from the proxy response to the original response
 	for name, values := range resp.Header {
 		for _, value := range values {
 			w.Header().Add(name, value)
 		}
 	}
 
-	// Set the status code of the original response to the status code of the proxy response
 	w.WriteHeader(resp.StatusCode)
 
 	io.Copy(w, resp.Body)
@@ -89,6 +87,11 @@ func (p *Proxy) handleRequestTLS(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 	}
 
+	err = p.services.Request.CreateRequest(r.Context(), r.Method, r.Host, r.URL.Path, r.Header, r.Cookies(), r.URL.Query(), r.Form, models.Response{})
+	if err != nil {
+		log.Println("Failed to add request to db")
+		return
+	}
 	go p.transfer(dest_conn, client_conn)
 	go p.transfer(client_conn, dest_conn)
 }

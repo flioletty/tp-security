@@ -24,13 +24,12 @@ func main() {
 	repos := repository.NewRepository(dbConn)
 	services := service.NewService(repos)
 	proxy := proxy.NewProxy(services)
-	// Create a new HTTP srv with the handleRequest function as the handler
+	
 	srv := http.Server{
 		Addr:    ":8080",
 		Handler: proxy.InitRoutes(),
 	}
 
-	// Start the server and log any errors
 	log.Println("Starting proxy server on :8080")
 	err = srv.ListenAndServe()
 	if err != nil {

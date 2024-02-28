@@ -32,7 +32,6 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	// Start the server and log any errors
 	log.Println("Starting proxy server on :8000")
 	err = srv.ListenAndServe()
 	if err != nil {
