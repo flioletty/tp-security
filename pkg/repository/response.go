@@ -13,13 +13,13 @@ type ResponseRepo struct {
 }
 
 func NewResponse(db *mongo.Database) *ResponseRepo {
-	return &ResponseRepo{dbConn: db, dbColl: db.Collection("requests")}
+	return &ResponseRepo{dbConn: db, dbColl: db.Collection("response")}
 }
 
 func (r *ResponseRepo) Create(ctx context.Context, response *models.Response) (*models.Response, error) {
-	_, err := r.dbColl.InsertOne(ctx, response)
-	if err != nil {
-		return nil, err
-	}
+	// _, err := r.dbColl.InsertOne(ctx, response)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	return response, nil
 }

@@ -26,7 +26,8 @@ func (s *RequestService) CreateRequest(ctx context.Context,
 	headers http.Header,
 	cookies []*http.Cookie,
 	getParams url.Values,
-	postParams url.Values) error {
+	postParams url.Values,
+	resp models.Response) error {
 
 	request := models.Request{Method: method,
 		Url:    url,
@@ -49,6 +50,8 @@ func (s *RequestService) CreateRequest(ctx context.Context,
 	for key, value := range postParams {
 		request.PostParams[key] = value
 	}
+
+	request.Response = resp
 
 	if _, err := s.RepoRequest.Create(ctx, &request); err != nil {
 		return err

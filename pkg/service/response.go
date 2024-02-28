@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"net/http"
 	"proxy/models"
 	"proxy/pkg/repository"
@@ -15,12 +14,11 @@ func NewResponseService(repoResponse repository.ResponseRepo) *ResponseService {
 	return &ResponseService{RepoResponse: repoResponse}
 }
 
-func (s *ResponseService) CreateResponse(ctx context.Context,
-	status int,
+func (s *ResponseService) CreateResponse(status int,
 	message string,
 	headers http.Header,
 	body []byte,
-) error {
+) (models.Response, error) {
 
 	response := models.Response{Status: status,
 		Message: message,
@@ -31,9 +29,5 @@ func (s *ResponseService) CreateResponse(ctx context.Context,
 	}
 	response.Body = string(body)
 
-	if _, err := s.RepoResponse.Create(ctx, &response); err != nil {
-		return err
-	}
-
-	return nil
+	return response, nil
 }

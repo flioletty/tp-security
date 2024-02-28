@@ -88,7 +88,7 @@ func (h *Handler) repeatRequest(request models.Request) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	h.services.Response.CreateResponse(reqHttp.Context(), resp.StatusCode, resp.Status, resp.Header, data)
+	h.services.Response.CreateResponse(resp.StatusCode, resp.Status, resp.Header, data)
 	return data, nil
 }
 

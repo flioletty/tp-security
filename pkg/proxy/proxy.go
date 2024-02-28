@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"proxy/pkg/service"
@@ -50,8 +51,25 @@ func (p *Proxy) handleRequest(w http.ResponseWriter, r *http.Request) {
 	// Set the status code of the original response to the status code of the proxy response
 	w.WriteHeader(resp.StatusCode)
 
-	// Copy the body of the proxy response to the original response
 	io.Copy(w, resp.Body)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Failed to parse response body")
+		return
+	}
+
+	respDb, err := p.services.Response.CreateResponse(resp.StatusCode, resp.Status, resp.Header, body)
+	if err != nil {
+		log.Println("Failed to add response to db")
+		return
+	}
+
+	err = p.services.Request.CreateRequest(r.Context(), r.Method, r.Host, r.URL.Path, r.Header, r.Cookies(), r.URL.Query(), r.Form, respDb)
+	if err != nil {
+		log.Println("Failed to add request to db")
+		return
+	}
 }
 
 func (p *Proxy) handleRequestTLS(w http.ResponseWriter, r *http.Request) {
